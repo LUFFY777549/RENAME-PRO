@@ -22,13 +22,14 @@ async def rename(bot,update):
         await update.message.delete()
         await update.message.reply_text(
             "__Please enter the new filename...__",
-            reply_to_message_id=update.message.reply_to_message.id,   # FIXED
+            reply_to_message_id=update.message.reply_to_message.id,
             reply_markup=ForceReply(True)
         )
 
 @Client.on_callback_query(filters.regex("doc"))
 async def doc(bot,update):
-     new_name = update.message.text
+
+     new_name = update.message.reply_to_message.text       # 🔥 FIXED
      name = new_name.split(":-")
      new_filename = name[1]
      file_path = f"downloads/{new_filename}"
@@ -80,7 +81,8 @@ async def doc(bot,update):
 
 @Client.on_callback_query(filters.regex("vid"))
 async def vid(bot,update):
-     new_name = update.message.text
+
+     new_name = update.message.reply_to_message.text      # 🔥 FIXED
      name = new_name.split(":-")
      new_filename = name[1]
      file_path = f"downloads/{new_filename}"
@@ -136,7 +138,8 @@ async def vid(bot,update):
 
 @Client.on_callback_query(filters.regex("aud"))
 async def aud(bot,update):
-     new_name = update.message.text
+
+     new_name = update.message.reply_to_message.text      # 🔥 FIXED
      name = new_name.split(":-")
      new_filename = name[1]
      file_path = f"downloads/{new_filename}"
