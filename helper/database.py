@@ -1,36 +1,45 @@
-import pymongo 
+import sqlite3
 import os
 
-DB_NAME = os.environ.get("DB_NAME","")
-DB_URL = os.environ.get("DB_URL","")
-mongo = pymongo.MongoClient(DB_URL)
-db = mongo[DB_NAME]
-dbcol = db["user"]
+DB_NAME = os.environ.get("DB_NAME", "database.db")   # sqlite file
+conn = sqlite3.connect(DB_NAME, check_same_thread=False)
+db = conn.cursor()
+
+# table create (Mongo jaise structure banaye rakha)
+db.execute("""CREATE TABLE IF NOT EXISTS user (
+    id INTEGER PRIMARY KEY,
+    file_id TEXT
+)""")
+conn.commit()
+
 
 def insert(chat_id):
-            user_id = int(chat_id)
-            user_det = {"_id":user_id,"file_id":None}
-            try:
-            	dbcol.insert_one(user_det)
-            except:
-            	pass
+    user_id = int(chat_id)
+    try:
+        db.execute("INSERT INTO user (id, file_id) VALUES (?, ?)", (user_id, None))
+        conn.commit()
+    except:
+        pass
+
 
 def addthumb(chat_id, file_id):
-	dbcol.update_one({"_id":chat_id},{"$set":{"file_id":file_id}})
-	
+    db.execute("UPDATE user SET file_id = ? WHERE id = ?", (file_id, chat_id))
+    conn.commit()
+
+
 def delthumb(chat_id):
-	dbcol.update_one({"_id":chat_id},{"$set":{"file_id":None}})
-	
+    db.execute("UPDATE user SET file_id = NULL WHERE id = ?", (chat_id,))
+    conn.commit()
+
+
 def find(chat_id):
-	id =  {"_id":chat_id}
-	x = dbcol.find(id)
-	for i in x:
-             lgcd = i["file_id"]
-             return lgcd 
+    db.execute("SELECT file_id FROM user WHERE id = ?", (chat_id,))
+    data = db.fetchone()
+    if data:
+        return data[0]
+
 
 def getid():
-    values = []
-    for key  in dbcol.find():
-         id = key["_id"]
-         values.append((id)) 
+    db.execute("SELECT id FROM user")
+    values = [row[0] for row in db.fetchall()]
     return values
